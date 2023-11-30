@@ -1,7 +1,7 @@
 # Laporan Proyek Machine Learning - Faizah Mappanyompa
 
 ## Project Overview
-
+<img src="https://www.pixelstalk.net/wp-content/uploads/images6/Anime-Wallpaper-Aesthetic-Wallpaper-Shounen-Jump-1.jpg" align="center">
 Anime merupakan animasi yang berasal dari Negara Jepang dalam bentuk hiburan visual yang memiliki berbagai genre [1]. Pesatnya pertumbuhan industri ini, seringkali penonton merasa kewalahan untuk memilih dan menonton anime sesuai preferensi mereka. Untuk mengatasi tantangan ini, sistem rekomendasi anime menjadi kebutuhan yang potensial.
 
 Penelitian sebelumnya terkait sistem rekomendasi anime telah dilakukan oleh (Girsang et.al, 2019) [2] menggunakan Collaborative Systems berdasarkan histori user menggunakan kumpulan data sebesar 100.000. Hasil penelitian menunjukkan cara yang sangat sederhana namun efisien untuk sistem rekomendasi.
