@@ -24,7 +24,7 @@ Adapun tujuan dari penelitian ini sebagai berikut:
 
 ## Data Understanding
 
-Dataset yang digunakan berasal dari [Kaggle](https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database/data) [3]. Database ini memiliki dua dataset yaitu `anime.csv` dan `rating.csv`. Dataset `anime.csv` memiliki ukuran sebesar (12294, 7) dan `rating.csv` sebesar (7813737, 3). Adapun variabel-variabel pada Anime Recommendations Database sebagai berikut:
+Dataset yang digunakan berasal dari [Kaggle](https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database/data) [3]. Database ini memiliki dua dataset yaitu `anime.csv` dan `rating.csv`. Dataset `anime.csv` memiliki ukuran sebesar (12294, 7) dan `rating.csv` sebesar (7813737, 3). Namun, untuk tahap selanjutnya, fitur yang akan digunakan hanyalah `name` dan `genre` dari anime. Untuk saat ini agar dapat mengeksplorasi dataset lebih jauh, ukuran dataset yang digunakan belum diubah. Adapun variabel-variabel pada Anime Recommendations Database sebagai berikut:
 
 **Anime.csv**
 
@@ -45,7 +45,10 @@ Dataset yang digunakan berasal dari [Kaggle](https://www.kaggle.com/datasets/Coo
 ### Univariate EDA
 
 - Periksa informasi mengenai fitur-fitur yang ada di df_anime dan df_rating menggunakan `.info()`
-- Periksa jumlah setiap genre `df_anime['genre]` menggunakan `.value_counts()`
+- Periksa jumlah setiap genre `df_anime['genre]` menggunakan `.value_counts()` yang dipisahkan dengan tanda koma. Jika kata dalam word cloud memiliki ukuran yang lebih besar maka kata tersebut memiliki frekuensi atau genre yang lebih banyak pada anime. Begitupun sebaliknya. Pada gambar dibawah, anime dengan genre action, comedy, dan adventure merupakan genre yang paling banyak di anime.
+
+  <img src="wordcloud-genre.png" align="center">
+
 - Periksa apakah terdapat duplikasi pada kolom anime menggunakan `.duplicated().sum()`
 
 ## Data Pre-Processing
@@ -56,7 +59,7 @@ Dataset yang digunakan berasal dari [Kaggle](https://www.kaggle.com/datasets/Coo
 ## Data Preparation
 
 1. Periksa kembali gabungan hasil kedua dataframe menggunakan `.info()`
-2. Untuk user yang tidak rating atau -1 diberikan nilai NaN, karena hal ini sama saja dengan user yang tidak memberikan nilai rating sama sekali atau bernilai 0.
+2. Untuk user yang tidak rating atau -1 diberikan nilai NaN. Nilai NaN dipilih karena pada pandas NaN dinotasikan sebagai missing value. Hal ini sama saja dengan user yang tidak memberikan nilai rating sama sekali atau bernilai 0 (tidak berpengaruh pada rekomendasi).
 3. Drop kolom yang duplikasi terutama pada `anime_id` dan `name`. Drop tersebut dilakukan untuk melakukan sistem rekomendasi pada nama anime dengan genrenya, sehingga tidak boleh duplikat.
 4. Agar mudah dibaca dan dipahami oleh mesin, feature name dan genre akan dilakukan cleaning jika memiliki nilai &quot, .hack//, ', A's, I', dan & menggunakan library regex.
 5. Ukuran dataframe berubah menjadi (9892, 9) setelah drop kolom yang duplikat
@@ -64,6 +67,8 @@ Dataset yang digunakan berasal dari [Kaggle](https://www.kaggle.com/datasets/Coo
 ## Modeling
 
 ### TF-IDF
+
+TF-IDF (Term Frequency-Inverse Document Frequency) merupakan teknik pada sistem rekomendasi terutama pada content-based filtering. Vektor pada TF-IDF dapat digunakan untuk menghitung cosine-similarity antara data anime. Hasil similarity ini akan membantu sistem rekomendasi dalam menentukan item yang mirip.
 
 1. Sebelum masuk ke tahap modelling, data akan dilakukan TF-IDF `TfidfVectorizer` terlebih dahulu untuk menemukan representasi fitur penting dari setiap genre anime.
 2. Lakukan fit dan transformasi ke dalam bentuk matriks. Hasilnya berupa 9892 nama anime dengan 47 genre.
@@ -76,7 +81,34 @@ Dataset yang digunakan berasal dari [Kaggle](https://www.kaggle.com/datasets/Coo
 2. Teknik ini digunakan untuk identifikasi kesamaan antara satu anime dengan anime lainnya.
    Adapun rumus cosine sebagai berikut:
 
-![Cosine Similarity](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20%5Ctext%7BCosine%20Similarity%7D%20%3D%20%5Cfrac%7B%5Cmathbf%7BA%7D%20%5Ccdot%20%5Cmathbf%7BB%7D%7D%7B%5C%7C%5Cmathbf%7BA%7D%5C%7C%20%5Ccdot%20%5C%7C%5Cmathbf%7BB%7D%5C%7C%7D)
+   ![Cosine Similarity](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20%5Ctext%7BCosine%20Similarity%7D%20%3D%20%5Cfrac%7B%5Cmathbf%7BA%7D%20%5Ccdot%20%5Cmathbf%7BB%7D%7D%7B%5C%7C%5Cmathbf%7BA%7D%5C%7C%20%5Ccdot%20%5C%7C%5Cmathbf%7BB%7D%5C%7C%7D)
+
+Dimana:
+
+- A dan B: vektor item
+
+  ![A \cdot B](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20A%20%5Ccdot%20B%20%3D%20%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20A_i%20%5Ccdot%20B_i)
+
+- merupakan dot product dari vektor A dan B
+
+  ![|A|](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20%5C%7CA%5C%7C%20%3D%20%5Csqrt%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20A_i%5E2%7D) ![|B|](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20%5C%7CB%5C%7C%20%3D%20%5Csqrt%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%20B_i%5E2%7D)
+
+- merupakan norma Euclidean dari vektor A dan B
+
+Sebagai contoh terdapat dua vektor:
+
+- A = [2,0]
+- B = [0,2]
+
+Maka:
+
+A x B = (2 x 0) + (0 x 2) = 0
+
+||A|| = 2
+
+||B|| = 2
+
+Maka Cosine sim = 0/4 = 0. Nilai dari Cos 0 adalah 1. Artinya kedua vektor A dan B memiliki similarity bernilai 1 (sangat mirip).
 
 ### Membuat Fungsi Rekomendasi
 
@@ -86,24 +118,38 @@ Fungsi ini yang merekomendasikan anime yang relevan.
    - anime_name: nama anime
    - similarity_data: fungsi cosine-similarity
    - items: name dan genre
-   - Keluaran sistem rekomendasi berupa top-N recommendation.
+   - k : banyak rekomendasi yang ingin diberikan
+   - Keluaran sistem rekomendasi berupa top-N recommendation. Misalnya jika N=5 maka akan merekomendasikan top 5 anime.
 2. Beberapa penjelasan method dan variable yang digunakan:
    - argpartition: mengambil sejumlah nilai k tertinggi dari similarity function
    - kemudian, ambil data dari bobot tertinggi ke rendah dan masukkan data ini ke variable closest
-   - dalam hal ini kita ingin cari rekomendasi dari anime berjudul Persona 5 the Animation: The Day Breakers, sehingga drop anime dengan judul ini agar tidak muncul dalam daftar rekomendasi (tidak double)
+   - dalam hal ini kita ingin cari rekomendasi dari anime berjudul Tentai Senshi Sunred, sehingga drop anime dengan judul ini agar tidak muncul dalam daftar rekomendasi (tidak double).
+
+Contoh Output:
+
+`anime_recommendations('Tentai Senshi Sunred')` memberikan 5 rekomendasi anime berupa:
+
+| num |                       name                        |                               genre |
+| :-- | :-----------------------------------------------: | ----------------------------------: |
+| 0   |          Tentai Senshi Sunred 2nd Season          | Comedy, Parody, Seinen, Super Power |
+| 1   |        Tentai Senshi Sunred: Short Corner         | Comedy, Parody, Seinen, Super Power |
+| 2   |     Kawasaki Frontale x Tentai Senshi Sunred      | Comedy, Parody, Seinen, Super Power |
+| 3   | Kawasaki Frontale x Tentai Senshi Sunred 2nd S... | Comedy, Parody, Seinen, Super Power |
+| 4   |            Himitsukessha Taka no Tsume            |         Comedy, Parody, Super Power |
 
 ## Evaluation
 
-Metrik yang digunakan pada model ini adalah Precision score. Precision score mengukur akurasi dari data prediksi positif pada semua item yang direkomendasikan. Dalam hal ini berarti:
+Metrik yang digunakan pada model ini adalah Precision score. Adapun mengapa precision score dipilih, karena berfokus pada keakuratan sistem dalam merekomendasikan anime yang relevan bagi pengguna. Precision score pada sistem rekomendasi memiliki rumus n rekomendasi yang relevan / n item yang direkomendasikan. Detailnya sebagai berikut:
 
-- True Positive (TP): anime yang relevan dan benar direkomendasikan
-- False Positive (FP): anime yang tidak relevan dan tidak benar direkomendasikan
+![Precision](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20P%20%3D%20%5Cfrac%7B%5Ctext%7Bour%20recommendations%20that%20are%20relevant%7D%7D%7B%5Ctext%7Bitems%20we%20recommended%7D%7D)
 
-Adapun mengapa precision score dipilih, karena berfokus pada keakuratan sistem dalam merekomendasikan anime yang relevan bagi pengguna.
+Sebagai contoh `anime_recommendations('Tentai Senshi Sunred')` memberikan rekomendasi seperti tabel di atas.
 
-Precision Score dikalkulasi menggunakan rumus:
+Genre pada anime Tentai Senshi Sunred adalah Comedy, Parody, Seinen, Super Power. Maka dari 5 item yang direkomendasikan, anime dari nomor 0-3 memiliki kategori yang persis sama dengan anime Tentai. Artinya nilai Precision sebesar:
 
-![Precision](https://latex.codecogs.com/svg.latex?%5Cdpi%7B300%7D%20%5Csmall%20%5Cbg_white%20%5Cfn_cm%20%5Ctext%7BPrecision%7D%20%3D%20%5Cfrac%7B%5Ctext%7BTrue%20Positives%7D%7D%7B%5Ctext%7BTrue%20Positives%7D%20%2B%20%5Ctext%7BFalse%20Positives%7D%7D)
+P = 4/5 = 0.8 = 80%
+
+Jadi, nilai precision score pada anime Tentai Senshi Sunred adalah 80%.
 
 Bedasarkan problem statement diatas, solusi pertama sudah terpenuhi:
 
